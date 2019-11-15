@@ -14,7 +14,7 @@ interface IProps {
  * Perspective library adds load to HTMLElement prototype.
  * This interface acts as a wrapper for Typescript compiler.
  */
-interface PerspectiveViewerElement {
+interface PerspectiveViewerElement extends HTMLElement {    //extends HTMLElement class from PerspectiveViewerElement interface
   load: (table: Table) => void,
 }
 
@@ -32,7 +32,7 @@ class Graph extends Component<IProps, {}> {
 
   componentDidMount() {
     // Get element to attach the table from the DOM.
-    const elem: PerspectiveViewerElement = document.getElementsByTagName('perspective-viewer')[0] as unknown as PerspectiveViewerElement;
+    const elem = document.getElementsByTagName('perspective-viewer')[0] as unknown as PerspectiveViewerElement;
 
     const schema = {
       stock: 'string',
@@ -46,9 +46,20 @@ class Graph extends Component<IProps, {}> {
     }
     if (this.table) {
       // Load the `table` in the `<perspective-viewer>` DOM reference.
-
+      
       // Add more Perspective configurations here.
       elem.load(this.table);
+      // we want line graph whose y axis is the stock’s top_ask_price and the x-axis is the timestamp of the stock
+      elem.setAttribute('view', 'y_line');                  //closest to continuous line graph
+      elem.setAttribute('column-pivots', '["stock"]');      //distinguish between stocks ABC and DEF
+      elem.setAttribute('row-pivots', '["timestamp"]');     //x-axis (map each datapoint based on timestamp)
+      elem.setAttribute('columns', '["top_ask_price"]');    //focus on top_ask_price
+      //conslidate duplicates as 1 data point
+      elem.setAttribute('aggregates', 
+      `{"stock": "distinct count",
+        "top_ask_price": "avg",
+        "top_bid_price": "avg",
+        "timestamp": "distinct count"}`)
     }
   }
 
