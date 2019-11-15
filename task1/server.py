@@ -18,7 +18,7 @@
 #  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #  DEALINGS IN THE SOFTWARE.
 
-#from itertools import izip
+#from itertools import izip              module does not exist in Python3
 from random    import normalvariate, random
 from datetime  import timedelta, datetime
 
@@ -31,7 +31,7 @@ import json
 import re
 import threading
 
-#from BaseHTTPServer import BaseHTTPRequestHandler,HTTPServer
+#replaced BaseHTTPServer module with http.server for Python3
 import http.server
 from socketserver   import ThreadingMixIn
 
@@ -70,7 +70,7 @@ def market(t0 = MARKET_OPEN):
     """ Generates a random series of market conditions,
         (time, price, spread).
     """
-    for hours, px, spd in zip(bwalk(*FREQ), bwalk(*PX), bwalk(*SPD)):
+    for hours, px, spd in zip(bwalk(*FREQ), bwalk(*PX), bwalk(*SPD)):    #zip() is built-in in Python3
         yield t0, px, spd
         t0 += timedelta(hours = abs(hours))
 
@@ -143,7 +143,7 @@ def order_book(orders, book, stock_name):
 
 def generate_csv():
     """ Generate a CSV of order history. """
-    with open('test.csv', 'wt') as f:
+    with open('test.csv', 'wb') as f:
         writer = csv.writer(f)
         for t, stock, side, order, size in orders(market()):
             if t > MARKET_OPEN + SIM_LENGTH:
@@ -215,7 +215,7 @@ def run(routes, host = '0.0.0.0', port = 8080):
     thread = threading.Thread(target = server.serve_forever)
     thread.daemon = True
     thread.start()
-    print ('HTTP server started on port 8080')
+    print('HTTP server started on port 8080')
     while True:
         from time import sleep
         sleep(1)
@@ -276,12 +276,12 @@ class App(object):
             t1, bids1, asks1 = next(self._current_book_1)
             t2, bids2, asks2 = next(self._current_book_2)
         except Exception as e:
-            print ("error getting stocks...reinitalizing app")
+            print("error getting stocks...reinitalizing app")
             self.__init__()
             t1, bids1, asks1 = next(self._current_book_1)
             t2, bids2, asks2 = next(self._current_book_2)
         t = t1 if t1 > t2 else t2
-        print ('Query received @ t%s' % t)
+        print('Query received @ t%s' % t)
         return [{
             'id': x and x.get('id', None),
             'stock': 'ABC',
@@ -315,6 +315,6 @@ class App(object):
 
 if __name__ == '__main__':
     if not os.path.isfile('test.csv'):
-        print ("No data found, generating...")
+        print("No data found, generating...")
         generate_csv()
     run(App())
